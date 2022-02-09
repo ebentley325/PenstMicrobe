@@ -1,0 +1,85 @@
+---
+title: "PenstMicrobe Permanova"
+output: html_notebook
+---
+
+ITS Permanovas
+```{r}
+#Run a permanova for ITS by taxon--use the multinomial
+library(vegan)
+library(dplyr)
+
+#import the OTU Table
+ITS_Taxon_OTU<- read.csv("/Users/ebentley/Desktop/PenstMicrobe-master/multinomial_estimates_ITS_by_taxon.csv")
+
+#import the metadata
+metadat<- metadat <- read.csv("/Users/ebentley/Desktop/PenstMicrobe-master/metadata_wrangled.csv", stringsAsFactors = F)
+
+
+#Make the "X" (Identifier Column) the index row names
+rownames(ITS_Taxon_OTU) <- ITS_Taxon_OTU$X
+ITS_Taxon_OTU<- ITS_Taxon_OTU[,2:7240]
+
+#Run the permanova using ADONIS from the vegan package
+permanovaITS_taxon<- adonis(ITS_Taxon_OTU ~ metadat$Taxon, data = ITS_Taxon_OTU, permutations=5000, method = "bray")
+print(permanovaITS_taxon)
+
+permanova_ITS_Taxon<-as.data.frame(permanovaITS_taxon$aov.tab)
+#write.csv(permanova_ITS_Taxon, "permanova_ITS_Taxon.csv")
+
+ITS_Taxon_Site_OTU<- read.csv("/Users/ebentley/Desktop/PenstMicrobe-master/multinomial_estimates_ITS_by_taxon_site.csv")
+
+permanovaITS_taxon_by_loc<- adonis(ITS_Taxon_Site_OTU ~ metadat$taxa_loc, data = ITS_Taxon_Site_OTU, permutations=5000, method = "bray")
+print(permanovaITS_taxon_by_loc)
+
+permanova_ITS_Taxon_Loc<-as.data.frame(permanovaITS_taxon_by_loc$aov.tab)
+#write.csv(permanova_ITS_Taxon_Loc, "permanova_ITS_Taxon_Loc.csv")
+
+```
+
+Permanovas for 16S
+```{r}
+#import the OTU Table
+Taxon_OTU_16S<- read.csv("/Users/ebentley/Desktop/PenstMicrobe-master/multinomial_estimates_16s_by_taxon.csv")
+
+#Make the "X" (Identifier Column) the index row names
+rownames(Taxon_OTU_16S) <- Taxon_OTU_16S$X
+Taxon_OTU_16S<- Taxon_OTU_16S[,2:1434]
+
+#Run the permanova using ADONIS from the vegan package
+permanova16S_taxon<- adonis(Taxon_OTU_16S ~ metadat$Taxon, data = Taxon_OTU_16S, permutations=5000, method = "bray")
+print(permanova16S_taxon)
+
+permanova_16S_Taxon<-as.data.frame(permanova16S_taxon$aov.tab)
+#write.csv(permanova_16S_Taxon, "/Users/ebentley/Desktop/PenstMicrobe-master/permanova_16S_Taxon.csv")
+
+Taxon_Site_OTU_16S<- read.csv("/Users/ebentley/Desktop/PenstMicrobe-master/multinomial_estimates_16s_by_taxon_site.csv")
+
+permanova16S_taxon_by_loc<- adonis(Taxon_Site_OTU_16S ~ metadat$taxa_loc, data = Taxon_Site_OTU_16S, permutations=5000, method = "bray")
+print(permanova16S_taxon_by_loc)
+permanova_16S_Taxon_Loc<-as.data.frame(permanova16S_taxon_by_loc$aov.tab)
+#write.csv(permanova_16S_Taxon_Loc, "permanova_16S_Taxon_Loc.csv")
+
+
+```
+
+
+
+#Try some stuff
+
+
+```{r}
+coef <- permanovaITS_taxon$coefficients
+top.coef <- sort(head(coef[rev(order(abs(coef)))],20))
+
+ggplot(data.frame(x = top.coef,
+                  y = factor(names(top.coef),
+                                      unique(names(top.coef)))),
+        aes(x = x, y = y)) +
+    geom_bar(stat="identity") +
+    labs(x="",y="",title="Top Taxa") +
+    theme_bw()
+```
+
+
+
